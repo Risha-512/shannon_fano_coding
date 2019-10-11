@@ -119,12 +119,18 @@ def Kraft_inequality():
     return inequality <= 1.0
 
 
+def average_length():
+    res = 0
+    for i in range(0, len(alphabet)):
+        res += alphabet[i][1] * len(alphabet[i][2])
+    return res
+
+
 def redundancy():
     entropy = 0
-    max_entropy = math.log2(len(alphabet))
-    for i in range(len(alphabet)):
+    for i in range(0, len(alphabet)):
         entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
-    return 1 - entropy/max_entropy
+    return average_length() - entropy
 
 
 def generate_string(n, path):
