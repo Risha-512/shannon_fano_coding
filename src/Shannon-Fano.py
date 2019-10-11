@@ -72,7 +72,7 @@ def shannon_fano(start, end):
 
 
 def searching_code(symb):
-    for i in range(0, len(alphabet)):
+    for i in range(len(alphabet)):
         if alphabet[i][0] == symb:
             return alphabet[i][2]
     return '-'
@@ -94,7 +94,7 @@ def encode(enc_str):
 def decode(code_str):
     res = ''
     while len(code_str) > 0:
-        for i in range(0, len(alphabet)):
+        for i in range(len(alphabet)):
             if code_str.startswith(alphabet[i][2]):
                 res += alphabet[i][0]
                 temp_str = ''
@@ -109,12 +109,12 @@ def decode(code_str):
 
 def Kraft_inequality():
     vect = []
-    for index in range(0, len(alphabet)):
+    for index in range(len(alphabet)):
         vect.append(len(alphabet[index][2]))
     print("Kraft's Vector: ", vect)
     inequality = 0
-    for index in range(0, len(vect)):
-        inequality += pow(2, -vect[index])
+    for index in range(len(vect)):
+        inequality += math.pow(2, -vect[index])
     print("Inequality: ", inequality)
     return inequality <= 1.0
 
@@ -122,7 +122,7 @@ def Kraft_inequality():
 def redundancy():
     entropy = 0
     max_entropy = math.log2(len(alphabet))
-    for i in range(0, len(alphabet)):
+    for i in range(len(alphabet)):
         entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
     return 1 - entropy/max_entropy
 
