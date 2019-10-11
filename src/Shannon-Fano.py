@@ -1,5 +1,6 @@
 import csv
 import sys
+import math
 
 
 alphabet = []
@@ -118,6 +119,14 @@ def Kraft_inequality():
     return inequality <= 1.0
 
 
+def redundancy():
+    entropy = 0
+    max_entropy = math.log2(len(alphabet))
+    for i in range(0, len(alphabet)):
+        entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
+    return 1 - entropy/max_entropy
+
+
 if __name__ == '__main__':
     # If script doesn't have 5 arguments or first argument isn't e or d, then exit
     if len(sys.argv) != 5 or not (sys.argv[1] == 'e' or sys.argv[1] == 'd'):
@@ -137,6 +146,9 @@ if __name__ == '__main__':
 
     # Check for Kraft's inequality
     print("Kraft's inequality is", Kraft_inequality())
+
+    # Redundancy check
+    print("Redundancy:", redundancy())
     print()
 
     # Encode or Decode and store result
