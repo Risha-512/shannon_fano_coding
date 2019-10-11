@@ -71,7 +71,7 @@ def shannon_fano(start, end):
 
 
 def searching_code(symb):
-    for i in range(0, len(alphabet)):
+    for i in range(len(alphabet)):
         if alphabet[i][0] == symb:
             return alphabet[i][2]
     return '-'
@@ -93,7 +93,7 @@ def encode(enc_str):
 def decode(code_str):
     res = ''
     while len(code_str) > 0:
-        for i in range(0, len(alphabet)):
+        for i in range(len(alphabet)):
             if code_str.startswith(alphabet[i][2]):
                 res += alphabet[i][0]
                 temp_str = ''
@@ -108,14 +108,20 @@ def decode(code_str):
 
 def Kraft_inequality():
     vect = []
-    for index in range(0, len(alphabet)):
+    for index in range(len(alphabet)):
         vect.append(len(alphabet[index][2]))
     print("Kraft's Vector: ", vect)
     inequality = 0
-    for index in range(0, len(vect)):
+    for index in range(len(vect)):
         inequality += pow(2, -vect[index])
     print("Inequality: ", inequality)
     return inequality <= 1.0
+
+
+def generate_string(n, path):
+    with open(path, "w") as file:
+        for index in range(len(alphabet)):
+            file.write(alphabet[index][0] * int(alphabet[index][1] * n))
 
 
 if __name__ == '__main__':
@@ -153,3 +159,6 @@ if __name__ == '__main__':
     # Save result to file path provided in 4 argument
     save_line_to_file(result, sys.argv[4])
     print("Saved result to: " + sys.argv[4])
+
+    # Generate string from alphabet probability
+    # generate_string(60, "./data/test.txt")
