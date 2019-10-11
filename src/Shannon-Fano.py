@@ -115,21 +115,22 @@ def Kraft_inequality():
     inequality = 0
     for index in range(len(vect)):
         inequality += math.pow(2, -vect[index])
-    print("Inequality: ", inequality)
+    print("Kraft's value: ", inequality)
     return inequality <= 1.0
 
 
 def average_length():
     res = 0
-    for i in range(0, len(alphabet)):
+    for i in range(len(alphabet)):
         res += alphabet[i][1] * len(alphabet[i][2])
     return res
 
 
 def redundancy():
     entropy = 0
-    for i in range(0, len(alphabet)):
-        entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
+    for i in range(len(alphabet)):
+        if alphabet[i][1] > 0.0:
+            entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
     return average_length() - entropy
 
 
@@ -140,16 +141,25 @@ def generate_string(n, path):
 
 
 if __name__ == '__main__':
-    # If first argument is 'gen' then generate string from alphabet probability
-    if sys.argv[1] == 'gen':
-        read_alphabet_file("./data/test/alphabet.txt")
-        generate_string(128, "./data/test/string.txt")
-        sys.exit()
-
-    # If script doesn't have 5 arguments or first argument isn't e or d, then exit
-    if len(sys.argv) != 5 or not (sys.argv[1] == 'e' or sys.argv[1] == 'd'):
-        print("Usage: Shannon-Fano.py [e|d] [path]Alphabet file [path]Input String file [path]Output String file")
+    # If script doesn't have 5 arguments then exit
+    if len(sys.argv) != 5:
+        print("(en|de)coding: Shannon-Fano.py [e|d] [path]Alphabet [path]Input_String [path]Output_String")
+        print("Generate string: Shannon-Fano.py g [int]String_Length [path]Alphabet [path]Output_String")
         sys.exit(1)
+
+    # If first argument is 'g' then generate string from alphabet probability
+    if sys.argv[1] == 'g':
+        # Read alphabet from file path provided in 3 argument
+        read_alphabet_file(sys.argv[3])
+
+        # Generate string with length provided in 2 argument
+        # to file path provided in 4 argument
+        generate_string(int(sys.argv[2]), sys.argv[4])
+
+        print("Creating string with ", sys.argv[2], "elements.")
+        print("From " + sys.argv[3])
+        print("To" + sys.argv[4])
+        sys.exit()
 
     # Read alphabet from file path provided in 2 argument
     read_alphabet_file(sys.argv[2])
@@ -159,14 +169,19 @@ if __name__ == '__main__':
 
     # Encode alphabet with Shannon-Fano algorithm and print it
     shannon_fano(0, len(alphabet) - 1)
-    print(alphabet)
+    print("Alphabet:\n", alphabet)
+    print()
+
+    # Calculate and print average code length
+    print("Average code length: ", average_length())
+    print()
+
+    # Calculate and print redundancy
+    print("Redundancy:", redundancy())
     print()
 
     # Check for Kraft's inequality
     print("Kraft's inequality is", Kraft_inequality())
-
-    # Redundancy check
-    print("Redundancy:", redundancy())
     print()
 
     # Encode or Decode and store result
