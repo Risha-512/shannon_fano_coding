@@ -134,6 +134,12 @@ def generate_string(n, path):
 
 
 if __name__ == '__main__':
+    # If first argument is 'gen' then generate string from alphabet probability
+    if sys.argv[1] == 'gen':
+        read_alphabet_file("./data/test/alphabet.txt")
+        generate_string(128, "./data/test/string.txt")
+        sys.exit()
+
     # If script doesn't have 5 arguments or first argument isn't e or d, then exit
     if len(sys.argv) != 5 or not (sys.argv[1] == 'e' or sys.argv[1] == 'd'):
         print("Usage: Shannon-Fano.py [e|d] [path]Alphabet file [path]Input String file [path]Output String file")
