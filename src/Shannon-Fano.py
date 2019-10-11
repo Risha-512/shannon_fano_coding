@@ -1,72 +1,73 @@
+import csv
 import sys
 
+
 alphabet = []
+input_string = ''
 
 
-def input_alphabet():
+def read_alphabet_file(path):
+    global alphabet
     try:
-        with open("data/alphabet.txt") as fin:
+        with open(path) as csv_file:
+            cvs_reader = csv.reader(csv_file, delimiter=' ')
             i = 0
-            for line in fin:
+            for row in cvs_reader:
                 alphabet.append([''] * 3)
-                data = line.split(' ')
-                alphabet[i][0] = data[0]
-                alphabet[i][1] = float(data[1])
+                alphabet[i][0] = row[0]
+                alphabet[i][1] = float(row[1])
+                alphabet[i][2] = ''
                 i += 1
         alphabet.sort(key=lambda x: x[1], reverse=True)
     except IOError:
-        print("Error opening file 'alphabet.txt'")
+        print("Error opening" + path)
 
 
-def input_string():
+def read_line_from_file(path):
     try:
-        with open("data/string.txt") as fin:
-            enc_str = fin.read()
-            return enc_str
+        with open(path) as fin:
+            return fin.readline()
     except IOError:
-        print("Error opening file 'string.txt'")
+        print("Error opening" + path)
 
 
-def input_code_str():
+def save_line_to_file(string, path):
     try:
-        with open("data/code_str.txt") as fin:
-            code_str = fin.read()
-            return code_str
+        with open(path, 'w+') as fout:
+            fout.write(string)
     except IOError:
-        print("Error opening file 'code_str.txt'")
+        print("Error opening" + path)
 
 
-def separator(begin, end):
-    sum_full = 0
-    for i in range(begin, end + 1):
-        sum_full += alphabet[i][1]
+def shannon_fano(start, end):
+    global alphabet
 
-    sum_l = 0
-    sum_r = 0
-    ind_l = begin
-    ind_r = end
+    size = end - start + 1
 
-    while sum_l + sum_r < sum_full:
-        if sum_l > sum_r:
-            sum_r += alphabet[ind_r][1]
-            ind_r -= 1
-        else:
-            sum_l += alphabet[ind_l][1]
-            ind_l += 1
+    if size == 2:
+        alphabet[start][2] += '1'
+        alphabet[end][2] += '0'
 
-    for i in range(begin, ind_r + 1):
-        alphabet[i][2] += '1'
-    for i in range(ind_l, end + 1):
-        alphabet[i][2] += '0'
+    elif size > 1:
+        sum_l = sum_r = 0
+        ind_l = start
+        ind_r = end
+        while ind_l != ind_r:
+            if sum_l > sum_r:
+                sum_r += alphabet[ind_r][1]
+                ind_r -= 1
+            else:
+                sum_l += alphabet[ind_l][1]
+                ind_l += 1
 
-    return ind_r
+        for index in range(start, end + 1):
+            if index <= ind_l:
+                alphabet[index][2] += '1'
+            else:
+                alphabet[index][2] += '0'
 
-
-def create_code(ind_l, ind_r):
-    if ind_l != ind_r:
-        ind = separator(ind_l, ind_r)
-        create_code(ind_l, ind)
-        create_code(ind + 1, ind_r)
+        shannon_fano(start, ind_l)
+        shannon_fano(ind_l + 1, end)
 
 
 def searching_code(symb):
@@ -76,7 +77,7 @@ def searching_code(symb):
     return '-'
 
 
-def encoding(enc_str):
+def encode(enc_str):
     res = ''
     for symb in enc_str:
         temp = searching_code(symb)
@@ -89,7 +90,7 @@ def encoding(enc_str):
     return res
 
 
-def decoding(code_str):
+def decode(code_str):
     res = ''
     while len(code_str) > 0:
         for i in range(0, len(alphabet)):
@@ -105,14 +106,29 @@ def decoding(code_str):
     return res
 
 
-input_alphabet()
-create_code(0, len(alphabet) - 1)
-print(alphabet)
-string = input_string()
-print(string)
-result = encoding(string)
-print(result)
-code_string = input_code_str()
-print(code_string)
-result = decoding(code_string)
-print(result)
+if __name__ == '__main__':
+    if len(sys.argv) != 5 or not (sys.argv[1] == 'e' or sys.argv[1] == 'd'):
+        print("Usage: Shannon-Fano.py [e|d] [path]Alphabet file [path]Input String file [path]Output String file")
+        sys.exit(1)
+
+    read_alphabet_file(sys.argv[2])
+    print(alphabet)
+
+    input_string = read_line_from_file(sys.argv[3])
+    print(input_string)
+
+    shannon_fano(0, len(alphabet) - 1)
+    print(alphabet)
+    print()
+
+    if sys.argv[1] == 'e':
+        print("Encoding: " + input_string)
+        result = encode(input_string)
+    else:
+        print("Decoding: " + input_string)
+        result = decode(input_string)
+
+    print("Result: " + result)
+
+    save_line_to_file(result, sys.argv[4])
+    print("Saved result to: " + sys.argv[4])
