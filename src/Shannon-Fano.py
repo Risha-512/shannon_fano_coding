@@ -1,5 +1,6 @@
 import csv
 import sys
+import math
 
 
 alphabet = []
@@ -71,7 +72,7 @@ def shannon_fano(start, end):
 
 
 def searching_code(symb):
-    for i in range(len(alphabet)):
+    for i in range(0, len(alphabet)):
         if alphabet[i][0] == symb:
             return alphabet[i][2]
     return '-'
@@ -93,7 +94,7 @@ def encode(enc_str):
 def decode(code_str):
     res = ''
     while len(code_str) > 0:
-        for i in range(len(alphabet)):
+        for i in range(0, len(alphabet)):
             if code_str.startswith(alphabet[i][2]):
                 res += alphabet[i][0]
                 temp_str = ''
@@ -108,14 +109,22 @@ def decode(code_str):
 
 def Kraft_inequality():
     vect = []
-    for index in range(len(alphabet)):
+    for index in range(0, len(alphabet)):
         vect.append(len(alphabet[index][2]))
     print("Kraft's Vector: ", vect)
     inequality = 0
-    for index in range(len(vect)):
+    for index in range(0, len(vect)):
         inequality += pow(2, -vect[index])
     print("Inequality: ", inequality)
     return inequality <= 1.0
+
+
+def redundancy():
+    entropy = 0
+    max_entropy = math.log2(len(alphabet))
+    for i in range(0, len(alphabet)):
+        entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
+    return 1 - entropy/max_entropy
 
 
 def generate_string(n, path):
@@ -143,6 +152,9 @@ if __name__ == '__main__':
 
     # Check for Kraft's inequality
     print("Kraft's inequality is", Kraft_inequality())
+
+    # Redundancy check
+    print("Redundancy:", redundancy())
     print()
 
     # Encode or Decode and store result
@@ -159,6 +171,3 @@ if __name__ == '__main__':
     # Save result to file path provided in 4 argument
     save_line_to_file(result, sys.argv[4])
     print("Saved result to: " + sys.argv[4])
-
-    # Generate string from alphabet probability
-    # generate_string(60, "./data/test.txt")
