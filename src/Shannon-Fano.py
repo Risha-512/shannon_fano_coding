@@ -36,7 +36,7 @@ def save_line_to_file(string, path):
         with open(path, 'w+') as fout:
             fout.write(string)
     except IOError:
-        print("Error opening" + path)
+        print("Error creating" + path)
 
 
 def shannon_fano(start, end):
@@ -106,21 +106,40 @@ def decode(code_str):
     return res
 
 
+def Kraft_inequality():
+    vect = []
+    for index in range(0, len(alphabet)):
+        vect.append(len(alphabet[index][2]))
+    print("Kraft's Vector: ", vect)
+    inequality = 0
+    for index in range(0, len(vect)):
+        inequality += pow(2, -vect[index])
+    print("Inequality: ", inequality)
+    return inequality <= 1.0
+
+
 if __name__ == '__main__':
+    # If script doesn't have 5 arguments or first argument isn't e or d, then exit
     if len(sys.argv) != 5 or not (sys.argv[1] == 'e' or sys.argv[1] == 'd'):
         print("Usage: Shannon-Fano.py [e|d] [path]Alphabet file [path]Input String file [path]Output String file")
         sys.exit(1)
 
+    # Read alphabet from file path provided in 2 argument
     read_alphabet_file(sys.argv[2])
-    print(alphabet)
 
+    # Read input string from file path provided in 3 argument
     input_string = read_line_from_file(sys.argv[3])
-    print(input_string)
 
+    # Encode alphabet with Shannon-Fano algorithm and print it
     shannon_fano(0, len(alphabet) - 1)
     print(alphabet)
     print()
 
+    # Check for Kraft's inequality
+    print("Kraft's inequality is", Kraft_inequality())
+    print()
+
+    # Encode or Decode and store result
     if sys.argv[1] == 'e':
         print("Encoding: " + input_string)
         result = encode(input_string)
@@ -128,7 +147,9 @@ if __name__ == '__main__':
         print("Decoding: " + input_string)
         result = decode(input_string)
 
+    # Print result
     print("Result: " + result)
 
+    # Save result to file path provided in 4 argument
     save_line_to_file(result, sys.argv[4])
     print("Saved result to: " + sys.argv[4])
