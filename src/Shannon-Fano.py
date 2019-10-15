@@ -14,11 +14,12 @@ def read_alphabet_file(path):
             cvs_reader = csv.reader(csv_file, delimiter=' ')
             i = 0
             for row in cvs_reader:
-                alphabet.append([''] * 3)
-                alphabet[i][0] = row[0]
-                alphabet[i][1] = float(row[1])
-                alphabet[i][2] = ''
-                i += 1
+                if float(row[1]) != 0.0:
+                    alphabet.append([''] * 3)
+                    alphabet[i][0] = row[0]
+                    alphabet[i][1] = float(row[1])
+                    alphabet[i][2] = ''
+                    i += 1
         alphabet.sort(key=lambda x: x[1], reverse=True)
     except IOError:
         print("Error opening" + path)
@@ -62,13 +63,13 @@ def shannon_fano(start, end):
                 ind_l += 1
 
         for index in range(start, end + 1):
-            if index <= ind_l:
+            if index < ind_l:
                 alphabet[index][2] += '1'
             else:
                 alphabet[index][2] += '0'
 
-        shannon_fano(start, ind_l)
-        shannon_fano(ind_l + 1, end)
+        shannon_fano(start, ind_l - 1)
+        shannon_fano(ind_l, end)
 
 
 def searching_code(symb):
@@ -80,30 +81,35 @@ def searching_code(symb):
 
 def encode(enc_str):
     res = ''
+    enc_str = enc_str.split(' ')
+    enc_str = enc_str[:len(enc_str) - 1]  # Get rid of the last space
     for symb in enc_str:
         temp = searching_code(symb)
         if temp != '-':
             res += temp
         else:
             print("String can't be encoded")
-            res = ''
-            break
+            return 'None'
     return res
+
+
+def searching_symbol(code_str):
+    for i in range(len(alphabet)):
+        if code_str.startswith(alphabet[i][2]):
+            return i
+    return '-'
 
 
 def decode(code_str):
     res = ''
     while len(code_str) > 0:
-        for i in range(len(alphabet)):
-            if code_str.startswith(alphabet[i][2]):
-                res += alphabet[i][0]
-                temp_str = ''
-                for j in range(len(alphabet[i][2]), len(code_str)):
-                    temp_str += code_str[j]
-                code_str = temp_str
-        if res == '':               # not quite right condition => need to fix
+        i = searching_symbol(code_str)
+        if i != '-':
+            res += alphabet[i][0]
+            code_str = code_str[len(alphabet[i][2]):]
+        else:
             print("Code string can't be decoded")
-            break
+            return 'None'
     return res
 
 
@@ -137,7 +143,7 @@ def redundancy():
 def generate_string(n, path):
     with open(path, "w") as file:
         for index in range(len(alphabet)):
-            file.write(alphabet[index][0] * int(alphabet[index][1] * n))
+            file.write((alphabet[index][0] + ' ') * int(alphabet[index][1] * n))
 
 
 if __name__ == '__main__':
