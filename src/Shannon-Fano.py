@@ -1,10 +1,38 @@
 import csv
 import sys
 import math
-
+from collections import defaultdict
 
 alphabet = []
 input_string = ''
+text = ''
+
+
+def read_text(path):
+    global text
+
+    try:
+        with open(path, 'r') as file:
+            text = file.read().replace('\n', '').replace(" ", "").lower()
+    except IOError:
+        print("Error opening" + path)
+
+
+def frequency_analysis():
+    global alphabet
+
+    frequencies = defaultdict(lambda: 0)
+
+    for c in text:
+        frequencies[c] += 1
+
+    i = 0
+    for item in frequencies:
+        alphabet.append(['']*3)
+        alphabet[i][0] = item
+        alphabet[i][1] = frequencies[item] / len(frequencies)
+        i += 1
+    alphabet.sort(key=lambda x: x[1], reverse=True)
 
 
 def read_alphabet_file(path):
@@ -62,6 +90,9 @@ def shannon_fano(start, end):
                 sum_l += alphabet[ind_l][1]
                 ind_l += 1
 
+        if sum_l < sum_r:
+            ind_l += 1
+
         for index in range(start, end + 1):
             if index < ind_l:
                 alphabet[index][2] += '1'
@@ -105,7 +136,7 @@ def decode(code_str):
     while len(code_str) > 0:
         i = searching_symbol(code_str)
         if i != '-':
-            res += alphabet[i][0]
+            res += alphabet[i][0] + ' '
             code_str = code_str[len(alphabet[i][2]):]
         else:
             print("Code string can't be decoded")
@@ -125,7 +156,7 @@ def Kraft_inequality():
     return inequality <= 1.0
 
 
-def average_length():
+def average_code_length():
     res = 0
     for i in range(len(alphabet)):
         res += alphabet[i][1] * len(alphabet[i][2])
@@ -135,9 +166,8 @@ def average_length():
 def redundancy():
     entropy = 0
     for i in range(len(alphabet)):
-        if alphabet[i][1] > 0.0:
-            entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
-    return average_length() - entropy
+        entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
+    return average_code_length() - entropy
 
 
 def generate_string(n, path):
@@ -148,9 +178,10 @@ def generate_string(n, path):
 
 if __name__ == '__main__':
     # If script doesn't have 5 arguments then exit
-    if len(sys.argv) != 5:
+    if len(sys.argv) != 5 and sys.argv[1] != 's':
         print("(en|de)coding: Shannon-Fano.py [e|d] [path]Alphabet [path]Input_String [path]Output_String")
         print("Generate string: Shannon-Fano.py g [int]String_Length [path]Alphabet [path]Output_String")
+        print("Static analysis: Shannon-Fano.py s [path]Text")
         sys.exit(1)
 
     # If first argument is 'g' then generate string from alphabet probability
@@ -167,11 +198,18 @@ if __name__ == '__main__':
         print("To" + sys.argv[4])
         sys.exit()
 
-    # Read alphabet from file path provided in 2 argument
-    read_alphabet_file(sys.argv[2])
+    if sys.argv[1] == 's':
+        # Read text from file
+        read_text(sys.argv[2])
+        # Perform frequency analysis
+        frequency_analysis()
 
-    # Read input string from file path provided in 3 argument
-    input_string = read_line_from_file(sys.argv[3])
+    if sys.argv[1] == 'e' or sys.argv[1] == 'd':
+        # Read alphabet from file path provided in 2 argument
+        read_alphabet_file(sys.argv[2])
+
+        # Read input string from file path provided in 3 argument
+        input_string = read_line_from_file(sys.argv[3])
 
     # Encode alphabet with Shannon-Fano algorithm and print it
     shannon_fano(0, len(alphabet) - 1)
@@ -179,7 +217,7 @@ if __name__ == '__main__':
     print()
 
     # Calculate and print average code length
-    print("Average code length: ", average_length())
+    print("Average code length: ", average_code_length())
     print()
 
     # Calculate and print redundancy
@@ -191,16 +229,16 @@ if __name__ == '__main__':
     print()
 
     # Encode or Decode and store result
-    if sys.argv[1] == 'e':
-        print("Encoding: " + input_string)
-        result = encode(input_string)
-    else:
-        print("Decoding: " + input_string)
-        result = decode(input_string)
-
-    # Print result
-    print("Result: " + result)
-
-    # Save result to file path provided in 4 argument
-    save_line_to_file(result, sys.argv[4])
-    print("Saved result to: " + sys.argv[4])
+    # if sys.argv[1] == 'e' or sys.argv[1] == 's':
+    #     print("Encoding: " + input_string)
+    #     result = encode(input_string)
+    # else:
+    #     print("Decoding: " + input_string)
+    #     result = decode(input_string)
+    #
+    # # Print result
+    # print("Result: " + result)
+    #
+    # # Save result to file path provided in 4 argument
+    # save_line_to_file(result, sys.argv[4])
+    # print("Saved result to: " + sys.argv[4])
