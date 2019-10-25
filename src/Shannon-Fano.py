@@ -105,10 +105,10 @@ def shannon_fano(start, end):
 
 def add_test_bit():
     for item in alphabet:
-        sum = 0
+        bits_sum = 0
         for c in item[2]:
-            sum += int(c)
-        item[2] += '0' if sum % 2 == 0 else '1'
+            bits_sum += int(c)
+        item[2] += '0' if bits_sum % 2 == 0 else '1'
 
 
 def searching_code(symb):
@@ -156,9 +156,19 @@ def searching_symbol(code_str):
 #     return errors_positions if len(errors_positions) != 0 else 'No errors'
 
 
+def hamming_distance(code):         # minimum distance between this code and code from alphabet
+    distance = len(alphabet[0][2])
+    for i in alphabet:
+        cur_distance = sum(c1 != c2 for c1, c2 in zip(code, i[2]))
+        if distance > cur_distance:
+            distance = cur_distance
+    return distance
+
+
 def decode(code_str):
     res = ''
     errors_positions = []
+    distances = []
     code_index = 0
 
     while len(code_str) > 0:
@@ -167,9 +177,10 @@ def decode(code_str):
             res += alphabet[i][0] + ' '
         else:
             errors_positions.append(str(code_index) + ' - ' + str(code_index + 3))
+            distances.append(hamming_distance(code_str[:len(alphabet[0][2])]))
         code_str = code_str[len(alphabet[0][2]):]
         code_index += 4
-    return res, errors_positions if len(errors_positions) != 0 else 'No errors'
+    return res, errors_positions if len(errors_positions) != 0 else 'No errors', distances
 
 
 def Kraft_inequality():
@@ -265,8 +276,10 @@ if __name__ == '__main__':
     else:
         # print("Errors positions:", find_errors_positions())
         print("Decoding: " + input_string)
-        result, errors = decode(input_string)
+        result, errors, h_distances = decode(input_string)
         print("Errors positions:", errors)
+        if len(h_distances) != 0:
+            print("Hamming distances:", h_distances)
 
     # Print result
     print("Result: " + result)
