@@ -139,31 +139,37 @@ def searching_symbol(code_str):
     return '-'
 
 
-def find_errors_positions():    # this function shows where to look for errors
-    code_str = input_string
-    errors_positions = []
-    code_index = 0
-
-    while len(code_str) > 0:
-        cur_code = code_str[:len(alphabet[0][2])]   # we have a uniform distribution
-        sum = 0                                     # so we can use any index
-        for c in cur_code:
-            sum += int(c)
-        if sum % 2 != 0:
-            errors_positions.append(str(code_index) + ' - ' + str(code_index + 3))
-        code_str = code_str[len(alphabet[0][2]):]
-        code_index += 4
-    return errors_positions if len(errors_positions) != 0 else 'No errors'
+# def find_errors_positions():    # this function shows where to look for errors
+#     code_str = input_string
+#     errors_positions = []
+#     code_index = 0
+#
+#     while len(code_str) > 0:
+#         cur_code = code_str[:len(alphabet[0][2])]   # we have a uniform distribution
+#         sum = 0                                     # so we can use any index
+#         for c in cur_code:
+#             sum += int(c)
+#         if sum % 2 != 0:
+#             errors_positions.append(str(code_index) + ' - ' + str(code_index + 3))
+#         code_str = code_str[len(alphabet[0][2]):]
+#         code_index += 4
+#     return errors_positions if len(errors_positions) != 0 else 'No errors'
 
 
 def decode(code_str):
     res = ''
+    errors_positions = []
+    code_index = 0
+
     while len(code_str) > 0:
         i = searching_symbol(code_str)
         if i != '-':
             res += alphabet[i][0] + ' '
+        else:
+            errors_positions.append(str(code_index) + ' - ' + str(code_index + 3))
         code_str = code_str[len(alphabet[0][2]):]
-    return res
+        code_index += 4
+    return res, errors_positions if len(errors_positions) != 0 else 'No errors'
 
 
 def Kraft_inequality():
@@ -257,9 +263,10 @@ if __name__ == '__main__':
         print("Encoding: " + input_string)
         result = encode(input_string)
     else:
-        print("Errors positions:", find_errors_positions())
+        # print("Errors positions:", find_errors_positions())
         print("Decoding: " + input_string)
-        result = decode(input_string)
+        result, errors = decode(input_string)
+        print("Errors positions:", errors)
 
     # Print result
     print("Result: " + result)
