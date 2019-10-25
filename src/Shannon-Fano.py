@@ -103,6 +103,14 @@ def shannon_fano(start, end):
         shannon_fano(ind_l, end)
 
 
+def add_test_bit():
+    for item in alphabet:
+        sum = 0
+        for c in item[2]:
+            sum += int(c)
+        item[2] += '0' if sum % 2 == 0 else '1'
+
+
 def searching_code(symb):
     for i in range(len(alphabet)):
         if alphabet[i][0] == symb:
@@ -131,16 +139,30 @@ def searching_symbol(code_str):
     return '-'
 
 
+def find_errors_positions():    # this function shows where to look for errors
+    code_str = input_string
+    errors_positions = []
+    code_index = 0
+
+    while len(code_str) > 0:
+        cur_code = code_str[:len(alphabet[0][2])]   # we have a uniform distribution
+        sum = 0                                     # so we can use any index
+        for c in cur_code:
+            sum += int(c)
+        if sum % 2 != 0:
+            errors_positions.append(str(code_index) + ' - ' + str(code_index + 3))
+        code_str = code_str[len(alphabet[0][2]):]
+        code_index += 4
+    return errors_positions if len(errors_positions) != 0 else 'No errors'
+
+
 def decode(code_str):
     res = ''
     while len(code_str) > 0:
         i = searching_symbol(code_str)
         if i != '-':
             res += alphabet[i][0] + ' '
-            code_str = code_str[len(alphabet[i][2]):]
-        else:
-            print("Code string can't be decoded")
-            return 'None'
+        code_str = code_str[len(alphabet[0][2]):]
     return res
 
 
@@ -213,7 +235,9 @@ if __name__ == '__main__':
 
     # Encode alphabet with Shannon-Fano algorithm and print it
     shannon_fano(0, len(alphabet) - 1)
-    print("Alphabet:\n", alphabet)
+    print("Alphabet without test bit:\n", alphabet, '\n')
+    add_test_bit()
+    print("Alphabet with test bit:\n", alphabet)
     print()
 
     # Calculate and print average code length
@@ -229,16 +253,17 @@ if __name__ == '__main__':
     print()
 
     # Encode or Decode and store result
-    # if sys.argv[1] == 'e' or sys.argv[1] == 's':
-    #     print("Encoding: " + input_string)
-    #     result = encode(input_string)
-    # else:
-    #     print("Decoding: " + input_string)
-    #     result = decode(input_string)
-    #
-    # # Print result
-    # print("Result: " + result)
-    #
-    # # Save result to file path provided in 4 argument
-    # save_line_to_file(result, sys.argv[4])
-    # print("Saved result to: " + sys.argv[4])
+    if sys.argv[1] == 'e' or sys.argv[1] == 's':
+        print("Encoding: " + input_string)
+        result = encode(input_string)
+    else:
+        print("Errors positions:", find_errors_positions())
+        print("Decoding: " + input_string)
+        result = decode(input_string)
+
+    # Print result
+    print("Result: " + result)
+
+    # Save result to file path provided in 4 argument
+    save_line_to_file(result, sys.argv[4])
+    print("Saved result to: " + sys.argv[4])
