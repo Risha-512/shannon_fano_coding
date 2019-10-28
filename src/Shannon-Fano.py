@@ -1,38 +1,8 @@
 import csv
 import sys
-import math
-from collections import defaultdict
 
 alphabet = []
 input_string = ''
-text = ''
-
-
-def read_text(path):
-    global text
-
-    try:
-        with open(path, 'r') as file:
-            text = file.read().replace('\n', '').replace(" ", "").lower()
-    except IOError:
-        print("Error opening" + path)
-
-
-def frequency_analysis():
-    global alphabet
-
-    frequencies = defaultdict(lambda: 0)
-
-    for c in text:
-        frequencies[c] += 1
-
-    i = 0
-    for item in frequencies:
-        alphabet.append(['']*3)
-        alphabet[i][0] = item
-        alphabet[i][1] = frequencies[item] / len(frequencies)
-        i += 1
-    alphabet.sort(key=lambda x: x[1], reverse=True)
 
 
 def read_alphabet_file(path):
@@ -139,36 +109,26 @@ def searching_symbol(code_str):
     return '-'
 
 
-# def find_errors_positions():    # this function shows where to look for errors
-#     code_str = input_string
-#     errors_positions = []
-#     code_index = 0
-#
-#     while len(code_str) > 0:
-#         cur_code = code_str[:len(alphabet[0][2])]   # we have a uniform distribution
-#         sum = 0                                     # so we can use any index
-#         for c in cur_code:
-#             sum += int(c)
-#         if sum % 2 != 0:
-#             errors_positions.append(str(code_index) + ' - ' + str(code_index + 3))
-#         code_str = code_str[len(alphabet[0][2]):]
-#         code_index += 4
-#     return errors_positions if len(errors_positions) != 0 else 'No errors'
+def count_distances():
+    distances = []
+    for i in alphabet:
+        distances.append(hamming_distance(i[2]))
+    return distances
 
 
 def hamming_distance(code):         # minimum distance between this code and code from alphabet
     distance = len(alphabet[0][2])
     for i in alphabet:
-        cur_distance = sum(c1 != c2 for c1, c2 in zip(code, i[2]))
-        if distance > cur_distance:
-            distance = cur_distance
+        if code != i[2]:
+            cur_distance = sum(c1 != c2 for c1, c2 in zip(code, i[2]))
+            if distance > cur_distance:
+                distance = cur_distance
     return distance
 
 
 def decode(code_str):
     res = ''
     errors_positions = []
-    distances = []
     code_index = 0
 
     while len(code_str) > 0:
@@ -177,78 +137,22 @@ def decode(code_str):
             res += alphabet[i][0] + ' '
         else:
             errors_positions.append(str(code_index) + ' - ' + str(code_index + 3))
-            distances.append(hamming_distance(code_str[:len(alphabet[0][2])]))
         code_str = code_str[len(alphabet[0][2]):]
         code_index += 4
-    return res, errors_positions if len(errors_positions) != 0 else 'No errors', distances
-
-
-def Kraft_inequality():
-    vect = []
-    for index in range(len(alphabet)):
-        vect.append(len(alphabet[index][2]))
-    print("Kraft's Vector: ", vect)
-    inequality = 0
-    for index in range(len(vect)):
-        inequality += math.pow(2, -vect[index])
-    print("Kraft's value: ", inequality)
-    return inequality <= 1.0
-
-
-def average_code_length():
-    res = 0
-    for i in range(len(alphabet)):
-        res += alphabet[i][1] * len(alphabet[i][2])
-    return res
-
-
-def redundancy():
-    entropy = 0
-    for i in range(len(alphabet)):
-        entropy -= alphabet[i][1] * math.log2(alphabet[i][1])
-    return average_code_length() - entropy
-
-
-def generate_string(n, path):
-    with open(path, "w") as file:
-        for index in range(len(alphabet)):
-            file.write((alphabet[index][0] + ' ') * int(alphabet[index][1] * n))
+    return res, errors_positions if len(errors_positions) != 0 else 'No errors'
 
 
 if __name__ == '__main__':
     # If script doesn't have 5 arguments then exit
-    if len(sys.argv) != 5 and sys.argv[1] != 's':
+    if len(sys.argv) != 5:
         print("(en|de)coding: Shannon-Fano.py [e|d] [path]Alphabet [path]Input_String [path]Output_String")
-        print("Generate string: Shannon-Fano.py g [int]String_Length [path]Alphabet [path]Output_String")
-        print("Static analysis: Shannon-Fano.py s [path]Text")
         sys.exit(1)
 
-    # If first argument is 'g' then generate string from alphabet probability
-    if sys.argv[1] == 'g':
-        # Read alphabet from file path provided in 3 argument
-        read_alphabet_file(sys.argv[3])
+    # Read alphabet from file path provided in 2 argument
+    read_alphabet_file(sys.argv[2])
 
-        # Generate string with length provided in 2 argument
-        # to file path provided in 4 argument
-        generate_string(int(sys.argv[2]), sys.argv[4])
-
-        print("Creating string with ", sys.argv[2], "elements.")
-        print("From " + sys.argv[3])
-        print("To" + sys.argv[4])
-        sys.exit()
-
-    if sys.argv[1] == 's':
-        # Read text from file
-        read_text(sys.argv[2])
-        # Perform frequency analysis
-        frequency_analysis()
-
-    if sys.argv[1] == 'e' or sys.argv[1] == 'd':
-        # Read alphabet from file path provided in 2 argument
-        read_alphabet_file(sys.argv[2])
-
-        # Read input string from file path provided in 3 argument
-        input_string = read_line_from_file(sys.argv[3])
+    # Read input string from file path provided in 3 argument
+    input_string = read_line_from_file(sys.argv[3])
 
     # Encode alphabet with Shannon-Fano algorithm and print it
     shannon_fano(0, len(alphabet) - 1)
@@ -256,30 +160,17 @@ if __name__ == '__main__':
     add_test_bit()
     print("Alphabet with test bit:\n", alphabet)
     print()
-
-    # Calculate and print average code length
-    print("Average code length: ", average_code_length())
-    print()
-
-    # Calculate and print redundancy
-    print("Redundancy:", redundancy())
-    print()
-
-    # Check for Kraft's inequality
-    print("Kraft's inequality is", Kraft_inequality())
-    print()
+    print("Distances:", count_distances())
 
     # Encode or Decode and store result
-    if sys.argv[1] == 'e' or sys.argv[1] == 's':
+    if sys.argv[1] == 'e':
         print("Encoding: " + input_string)
         result = encode(input_string)
     else:
         # print("Errors positions:", find_errors_positions())
         print("Decoding: " + input_string)
-        result, errors, h_distances = decode(input_string)
+        result, errors = decode(input_string)
         print("Errors positions:", errors)
-        if len(h_distances) != 0:
-            print("Hamming distances:", h_distances)
 
     # Print result
     print("Result: " + result)
