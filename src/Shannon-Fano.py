@@ -20,7 +20,7 @@ def read_alphabet_file(path):
                     i += 1
         alphabet.sort(key=lambda x: x[1], reverse=True)
     except IOError:
-        print("Error opening" + path)
+        print('Error opening' + path)
 
 
 def read_line_from_file(path):
@@ -28,7 +28,7 @@ def read_line_from_file(path):
         with open(path) as fin:
             return fin.readline()
     except IOError:
-        print("Error opening" + path)
+        print('Error opening' + path)
 
 
 def save_line_to_file(string, path):
@@ -36,7 +36,7 @@ def save_line_to_file(string, path):
         with open(path, 'w+') as fout:
             fout.write(string)
     except IOError:
-        print("Error creating" + path)
+        print('Error creating' + path)
 
 
 def shannon_fano(start, end):
@@ -97,7 +97,7 @@ def encode(enc_str):
         if temp != '-':
             res += temp
         else:
-            print("String can't be encoded")
+            print('String can\'t be encoded')
             return 'None'
     return res
 
@@ -107,13 +107,6 @@ def searching_symbol(code_str):
         if code_str.startswith(alphabet[i][2]):
             return i
     return '-'
-
-
-def count_distances():
-    distances = []
-    for i in alphabet:
-        distances.append(hamming_distance(i[2]))
-    return distances
 
 
 def hamming_distance(code):         # minimum distance between this code and code from alphabet
@@ -136,16 +129,16 @@ def decode(code_str):
         if i != '-':
             res += alphabet[i][0] + ' '
         else:
-            errors_positions.append(str(code_index) + ' - ' + str(code_index + 3))
+            errors_positions.append(str(code_index + 1) + ' - ' + str(code_index + len(alphabet[0][2])))
         code_str = code_str[len(alphabet[0][2]):]
-        code_index += 4
+        code_index += len(alphabet[0][2])
     return res, errors_positions if len(errors_positions) != 0 else 'No errors'
 
 
 if __name__ == '__main__':
     # If script doesn't have 5 arguments then exit
-    if len(sys.argv) != 5:
-        print("(en|de)coding: Shannon-Fano.py [e|d] [path]Alphabet [path]Input_String [path]Output_String")
+    if len(sys.argv) != 5 or sys.argv[1] != 'e' and sys.argv[1] != 'd':
+        print('(en|de)coding: Shannon-Fano.py [e|d] [path]Alphabet [path]Input_String [path]Output_String')
         sys.exit(1)
 
     # Read alphabet from file path provided in 2 argument
@@ -156,25 +149,26 @@ if __name__ == '__main__':
 
     # Encode alphabet with Shannon-Fano algorithm and print it
     shannon_fano(0, len(alphabet) - 1)
-    print("Alphabet without test bit:\n", alphabet, '\n')
+    print('Alphabet without test bit:\n', alphabet, '\n')
     add_test_bit()
-    print("Alphabet with test bit:\n", alphabet)
+    print('Alphabet with test bit:\n', alphabet)
     print()
-    print("Distances:", count_distances())
+
+    # Count Hamming distances
+    print('Distance:', hamming_distance(alphabet[0][2]))
 
     # Encode or Decode and store result
     if sys.argv[1] == 'e':
-        print("Encoding: " + input_string)
+        print('Encoding: ' + input_string)
         result = encode(input_string)
     else:
-        # print("Errors positions:", find_errors_positions())
-        print("Decoding: " + input_string)
+        print('Decoding: ' + input_string)
         result, errors = decode(input_string)
-        print("Errors positions:", errors)
+        print('Errors positions:', errors)
 
     # Print result
-    print("Result: " + result)
+    print('Result: ' + result)
 
     # Save result to file path provided in 4 argument
     save_line_to_file(result, sys.argv[4])
-    print("Saved result to: " + sys.argv[4])
+    print('Saved result to: ' + sys.argv[4])
